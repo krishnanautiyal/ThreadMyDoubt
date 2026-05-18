@@ -1,0 +1,173 @@
+import type { StoredCommunity } from '../types';
+
+export const DEMO_COMMUNITIES: StoredCommunity[] = [
+  // Technology
+  {
+    id: 1,
+    name: 'React Fanatics',
+    description: 'A community for developers passionate about React, Next.js, and the entire React ecosystem.',
+    members: 12500,
+    icon: 'fa-react',
+    category: 'Technology',
+  },
+  {
+    id: 4,
+    name: 'Node.js Ninjas',
+    description: 'All things backend JavaScript. From Express and NestJS to serverless architecture and performance.',
+    members: 9800,
+    icon: 'fa-node-js',
+    category: 'Technology',
+  },
+  {
+    id: 2,
+    name: 'AI Explorers',
+    description: 'Discussing the latest in Machine Learning, Large Language Models, and artificial intelligence innovations.',
+    members: 8750,
+    icon: 'fa-robot',
+    category: 'Technology',
+  },
+  {
+    id: 5,
+    name: 'Cloud Natives',
+    description: 'For engineers working with Docker, Kubernetes, AWS, GCP, Azure, and serverless technologies.',
+    members: 7300,
+    icon: 'fa-cloud',
+    category: 'Technology',
+  },
+
+  // Science
+  {
+    id: 6,
+    name: 'Cosmology Corner',
+    description: 'Explore the universe, from black holes to the Big Bang. A space for astronomers and astrophysicists.',
+    members: 5200,
+    icon: 'fa-rocket',
+    category: 'Science',
+  },
+  {
+    id: 7,
+    name: 'BioHackers',
+    description: 'A community for bio-technologists, geneticists, and DIY biology enthusiasts.',
+    members: 3400,
+    icon: 'fa-dna',
+    category: 'Science',
+  },
+  {
+    id: 8,
+    name: 'Physics Phreaks',
+    description: 'From quantum mechanics to classical dynamics, discuss the fundamental principles of nature.',
+    members: 6100,
+    icon: 'fa-atom',
+    category: 'Science',
+  },
+  {
+    id: 9,
+    name: 'Chemistry Collective',
+    description: 'A place for chemists to discuss reactions, molecules, and the periodic table.',
+    members: 4500,
+    icon: 'fa-flask',
+    category: 'Science',
+  },
+
+  // Design
+  {
+    id: 3,
+    name: 'UI/UX Wizards',
+    description: 'For designers and developers focused on creating beautiful, intuitive, and user-friendly interfaces.',
+    members: 6200,
+    icon: 'fa-palette',
+    category: 'Design',
+  },
+  {
+    id: 10,
+    name: 'Figma Fanatics',
+    description: 'Share plugins, tips, and designs with fellow Figma users. From auto-layout to prototyping.',
+    members: 8800,
+    icon: 'fab fa-figma',
+    category: 'Design',
+  },
+  {
+    id: 11,
+    name: '3D Artists',
+    description: 'A community for creators using Blender, Cinema 4D, and other 3D modeling software.',
+    members: 7100,
+    icon: 'fa-cube',
+    category: 'Design',
+  },
+  {
+    id: 12,
+    name: 'Branding Buffs',
+    description: 'Discuss logo design, brand strategy, typography, and creating memorable visual identities.',
+    members: 4900,
+    icon: 'fa-copyright',
+    category: 'Design',
+  },
+
+  // Programming
+  {
+    id: 13,
+    name: 'Pythonistas',
+    description: 'A hub for Python developers. Discuss Django, Flask, data science, scripting, and more.',
+    members: 15200,
+    icon: 'fab fa-python',
+    category: 'Programming',
+  },
+  {
+    id: 14,
+    name: 'Rustaceans',
+    description: 'For developers passionate about memory safety and performance with the Rust programming language.',
+    members: 4800,
+    icon: 'fab fa-rust',
+    category: 'Programming',
+  },
+  {
+    id: 15,
+    name: 'Go Gophers',
+    description: 'A community for Go developers to discuss concurrency, performance, and building scalable systems.',
+    members: 6300,
+    icon: 'fab fa-google',
+    category: 'Programming',
+  },
+  {
+    id: 16,
+    name: 'C++ Champions',
+    description: 'For experts in high-performance computing, game development, and systems programming with C++.',
+    members: 7800,
+    icon: 'fas fa-c',
+    category: 'Programming',
+  },
+
+  // Art
+  {
+    id: 17,
+    name: 'Digital Painters',
+    description: 'Share your work, brushes, and techniques. For users of Procreate, Photoshop, and other painting software.',
+    members: 9500,
+    icon: 'fa-paint-brush',
+    category: 'Art',
+  },
+  {
+    id: 18,
+    name: 'Pixel Pushers',
+    description: 'A community dedicated to the craft of pixel art. From game assets to standalone pieces.',
+    members: 4200,
+    icon: 'fa-th-large',
+    category: 'Art',
+  },
+  {
+    id: 19,
+    name: 'Generative Art',
+    description: 'Explore the intersection of code and creativity. For artists using p5.js, Processing, and other tools.',
+    members: 5800,
+    icon: 'fa-random',
+    category: 'Art',
+  },
+  {
+    id: 20,
+    name: 'Photography Focus',
+    description: 'A place to share photos, discuss gear, and learn about composition and post-processing.',
+    members: 10500,
+    icon: 'fa-camera-retro',
+    category: 'Art',
+  },
+];

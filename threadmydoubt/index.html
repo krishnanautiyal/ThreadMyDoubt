@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ThreadMyDoubt | Ask, Discuss, Discover</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+      :root {
+        /* Da Vinci Design Language - Light Theme */
+        --bg-primary: #f9fafb;
+        --bg-secondary: #ffffff;
+        --bg-elevated: #ffffff;
+        --bg-nav-glass: rgba(255, 255, 255, 0.7);
+
+        --text-strong: #1a1b1e;
+        --text-normal: #5c616a;
+        --text-muted: #9ca1a9;
+
+        --accent: #755bff;
+        --accent-soft: #8678ff;
+        --accent-glow: #b8a7ff;
+
+        --border-soft: #e9ebed;
+        --border-strong: #d2d6db;
+
+        --success: #4bd37b;
+        --danger: #ff5f5f;
+
+        --shadow-soft: 0 4px 20px rgba(0,0,0,0.08);
+        --shadow-glow: 0 0 20px rgba(117,91,255,0.15);
+        --shadow-glow-soft: 0 0 15px rgba(117,91,255,0.1);
+
+        --radius: 14px;
+        --radius-lg: 18px;
+      }
+      
+      :root.dark {
+        /* Da Vinci Design Language - Dark Theme */
+        --bg-primary: #0d0d0f;
+        --bg-secondary: #151518;
+        --bg-elevated: #1b1c20;
+        --bg-nav-glass: rgba(21, 21, 24, 0.7);
+
+        --text-strong: #ffffff;
+        --text-normal: #c0c8d6;
+        --text-muted: #6f7480;
+
+        --border-soft: #23242a;
+        --border-strong: #33343a;
+
+        --shadow-soft: 0 4px 20px rgba(0,0,0,0.25);
+        --shadow-glow: 0 0 20px rgba(117,91,255,0.45);
+        --shadow-glow-soft: 0 0 15px rgba(117,91,255,0.2);
+      }
+
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-normal);
+        letter-spacing: 0.3px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      .glass-nav {
+        background-color: var(--bg-nav-glass);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+
+      .input-field {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius);
+        color: var(--text-normal);
+        transition: all 0.2s ease-in-out;
+      }
+
+      .input-field:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(117, 91, 255, 0.3);
+      }
+      
+      .input-field::placeholder {
+        color: var(--text-muted);
+      }
+      
+      /* AI Suggestion Content Styling */
+      .ai-suggestion-content {
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+      .ai-suggestion-content h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-strong);
+        margin-top: 1.5em;
+        margin-bottom: 0.8em;
+        border-bottom: 1px solid var(--border-soft);
+        padding-bottom: 0.3em;
+      }
+      .ai-suggestion-content p {
+        margin-bottom: 1em;
+      }
+      .ai-suggestion-content strong {
+        font-weight: 600;
+        color: var(--text-strong);
+      }
+      .ai-suggestion-content ul {
+        list-style-type: disc;
+        padding-left: 1.5em;
+        margin-bottom: 1em;
+      }
+      .ai-suggestion-content li {
+        margin-bottom: 0.5em;
+      }
+      .ai-suggestion-content code {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-soft);
+        padding: 0.2em 0.4em;
+        margin: 0 0.1em;
+        font-size: 0.9em;
+        border-radius: 6px;
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        color: var(--accent-soft);
+      }
+      .ai-suggestion-content pre {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-soft);
+        padding: 1em;
+        border-radius: var(--radius);
+        overflow-x: auto;
+        margin: 1.5em 0;
+      }
+      .ai-suggestion-content pre code {
+        background-color: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+        font-size: 0.9em;
+        color: var(--text-normal);
+        line-height: 1.5;
+      }
+      
+      /* Notification Badge */
+      .notification-bell {
+        position: relative;
+        cursor: pointer;
+      }
+      .badge {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background: #ff4d4d;
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+        border: 2px solid var(--bg-secondary);
+      }
+
+      /* Achievements Panel */
+      .achievements-card {
+        background: var(--bg-secondary);
+        padding: 22px;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-soft);
+      }
+      .achievements-card h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: var(--text-strong);
+          margin-bottom: 1rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid var(--border-soft);
+      }
+      .achievement-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 4px;
+        border-bottom: 1px solid var(--border-soft);
+        opacity: 0.4;
+        transition: all 0.3s ease;
+      }
+      .achievement-item:last-child {
+          border-bottom: none;
+      }
+      .achievement-item .icon {
+          font-size: 1.75rem;
+          filter: grayscale(1);
+          transition: filter 0.3s ease;
+      }
+      .achievement-item .name {
+          font-weight: 600;
+          color: var(--text-normal);
+      }
+      .achievement-item .description {
+          font-size: 0.8rem;
+          color: var(--text-muted);
+      }
+      .achievement-item.active {
+        opacity: 1;
+      }
+      .achievement-item.active .icon {
+          filter: grayscale(0);
+      }
+      .achievement-item.active .name {
+        color: var(--text-strong);
+      }
+      .achievement-item.active .dot {
+        margin-left: auto;
+        width: 10px;
+        height: 10px;
+        background: var(--success);
+        border-radius: 50%;
+        box-shadow: 0 0 8px rgba(75, 211, 123, 0.7);
+        flex-shrink: 0;
+      }
+
+      /* Notification Panel */
+      .notification-panel {
+        position: fixed;
+        top: 90px;
+        right: 20px;
+        background: var(--bg-elevated);
+        padding: 14px 20px;
+        border-radius: var(--radius);
+        color: var(--text-strong);
+        font-weight: 500;
+        box-shadow: var(--shadow-soft);
+        border-left: 4px solid var(--accent);
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        z-index: 9999;
+      }
+
+      /* AI Rating System */
+      .rating-box {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-soft);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .rating-box p {
+          margin: 0;
+          font-weight: 500;
+          color: var(--text-normal);
+      }
+      .star {
+        cursor: pointer;
+        font-size: 22px;
+        opacity: 0.5;
+        transition: all 0.2s;
+      }
+      .star.active,
+      .star:hover {
+        opacity: 1;
+        transform: scale(1.2);
+      }
+
+
+      /* Animations */
+      @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+      }
+      .animate-fadeInUp {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+
+      @keyframes glow-pulse {
+        0%, 100% { box-shadow: 0 0 20px rgba(117,91,255,0.3); }
+        50% { box-shadow: 0 0 30px rgba(117,91,255,0.5); }
+      }
+    </style>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.1"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
