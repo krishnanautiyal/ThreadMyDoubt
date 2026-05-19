@@ -19,7 +19,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ setUser, setNotification }) => 
     
     
     const handleGoogleSignup = () => {
-    window.location.href = "http://localhost:5000/auth/google";
+    window.location.href = "https://threadmydoubt.onrender.com/auth/google";
 };
 
 

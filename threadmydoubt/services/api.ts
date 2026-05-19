@@ -1,4 +1,4 @@
-const BASE = "http://localhost:5000/api";
+const BASE = "https://threadmydoubt.onrender.com/api";
 
 const getHeaders = () => {
     const headers: HeadersInit = {
