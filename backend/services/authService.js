@@ -153,9 +153,6 @@ async(userId,updates)=>{
 };
 
 
-const User = require("../models/User");
-const prisma = require("../config/prisma");
-
 exports.register = async (req, res) => {
     try {
 
