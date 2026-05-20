@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const connectDB = require('./config/db');
+const testRoutes = require("./routes/testRoutes");
 
 // Load env vars
 dotenv.config();
@@ -25,7 +26,7 @@ const passport = require('./config/passport');
 app.use(cors());
 app.use(express.json());
 
-
+app.use("/api/test", testRoutes);
 
 //------------------------
 app.use(passport.initialize());
