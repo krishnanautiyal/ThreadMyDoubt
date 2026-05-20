@@ -2,7 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
 
-// 🔹 Generate JWT
+// Generate JWT
 const generateToken = (id) => {
     return jwt.sign(
         { id },
@@ -11,14 +11,14 @@ const generateToken = (id) => {
     );
 };
 
-// 🔹 Register
+// Register User
 exports.registerUser = async ({
     username,
     email,
     password
 }) => {
 
-    // Mongo check
+    // Check MongoDB first
     const userExists = await User.findOne({
         $or: [{ email }, { username }]
     });
@@ -27,49 +27,82 @@ exports.registerUser = async ({
         throw new Error('User already exists');
     }
 
-    // Save to Mongo
+    // Save in MongoDB
     const user = await User.create({
         username,
         email,
         password
     });
 
+    // Mirror in PostgreSQL
     try {
 
-        // Save same user to PostgreSQL
-        await prisma.user.create({
-            data: {
-                username,
-                email,
-                password: user.password, // already hashed by Mongoose
-                role: user.role,
-                bio: user.bio,
-                reputation: user.reputation,
-                profilePicture: user.profilePicture
+        await prisma.user.upsert({
+            where: {
+                email: user.email
+            },
+
+            update: {},
+
+            create: {
+                username: user.username,
+                email: user.email,
+
+                // Already hashed by your mongoose model
+                password: user.password,
+
+                role:
+                    user.role ||
+                    "Community Member",
+
+                bio:
+                    user.bio ||
+                    "",
+
+                reputation:
+                    user.reputation ||
+                    0,
+
+                profilePicture:
+                    user.profilePicture ||
+                    "https://ui-avatars.com/api/?name=User&background=random",
+
+                achievements: []
             }
         });
 
-    } catch(error) {
+        console.log(
+            "User saved to PostgreSQL:",
+            user.email
+        );
+
+    } catch(error){
 
         console.log(
-            "Prisma save failed:",
-            error.message
+            "Prisma save failed:"
         );
+
+        console.log(error);
     }
 
-    const token = generateToken(user._id);
+    const token = generateToken(
+        user._id
+    );
 
-    return { user, token };
+    return {
+        user,
+        token
+    };
 };
 
 
-// 🔹 Login
+// Login User
 exports.loginUser = async ({
     email,
     password
 }) => {
 
-    if(!email || !password){
+    if (!email || !password) {
         throw new Error(
             'Please provide email and password'
         );
@@ -80,7 +113,7 @@ exports.loginUser = async ({
             email
         }).select('+password');
 
-    if(!user){
+    if (!user) {
         throw new Error(
             'Invalid credentials'
         );
@@ -91,7 +124,7 @@ exports.loginUser = async ({
             password
         );
 
-    if(!isMatch){
+    if (!isMatch) {
         throw new Error(
             'Invalid credentials'
         );
@@ -102,12 +135,16 @@ exports.loginUser = async ({
             user._id
         );
 
-    return { user, token };
+    return {
+        user,
+        token
+    };
 };
 
 
-// 🔹 Get current user
-exports.getCurrentUser = async (userId)=>{
+// Get Current User
+exports.getCurrentUser =
+async (userId) => {
 
     return await User.findById(
         userId
@@ -115,16 +152,16 @@ exports.getCurrentUser = async (userId)=>{
 };
 
 
-// 🔹 Update profile
+// Update User Profile
 exports.updateUserProfile =
-async(userId,updates)=>{
+async (userId, updates) => {
 
     const user =
         await User.findById(
             userId
         );
 
-    if(!user){
+    if (!user) {
         throw new Error(
             "User not found"
         );
@@ -138,7 +175,9 @@ async(userId,updates)=>{
         updates.role ||
         user.role;
 
-    if(updates.bio !== undefined){
+    if (
+        updates.bio !== undefined
+    ) {
         user.bio =
             updates.bio;
     }
@@ -150,47 +189,4 @@ async(userId,updates)=>{
     await user.save();
 
     return user;
-};
-
-
-exports.register = async (req, res) => {
-    try {
-
-        const { username, email, password } = req.body;
-
-        // Mongo save (your existing code)
-        const user = await User.create({
-            username,
-            email,
-            password
-        });
-
-        // PostgreSQL mirror
-        await prisma.user.upsert({
-            where: {
-                email: user.email
-            },
-            update: {},
-            create: {
-                username: user.username,
-                email: user.email,
-                password: user.password,
-                achievements: []
-            }
-        });
-
-        res.status(201).json({
-            success: true,
-            user
-        });
-
-    } catch(error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Error"
-        });
-    }
 };
