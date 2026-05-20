@@ -82,7 +82,7 @@ const { Server } = require("socket.io");
 
 const io = new Server(server, {
     cors: {
-        origin: "http://threadmydoubt.vercel.app",
+        origin: "https://threadmydoubt.vercel.app/",
         methods: ["GET", "POST"]
     }
 });
