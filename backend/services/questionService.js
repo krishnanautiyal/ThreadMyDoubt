@@ -4,6 +4,7 @@ const Question = require('../models/Question');
 const Community = require('../models/Community');
 const Answer = require('../models/Answer');
 const User = require('../models/User');
+const prisma = require('../config/prisma');
 
 // 🔹 Get all questions
 exports.getQuestions = async (queryParams) => {
@@ -45,20 +46,84 @@ exports.getQuestionById = async (id) => {
 
 // 🔹 Create question
 exports.createQuestion = async ({ body, user }) => {
-    const community = await Community.findById(body.communityId);
-    if (!community) throw new Error('Community not found');
 
+    const community = await Community.findById(
+        body.communityId
+    );
+
+    if (!community) {
+        throw new Error(
+            'Community not found'
+        );
+    }
+
+    // Save in MongoDB
     const question = await Question.create({
         ...body,
         authorId: user.id
     });
 
-    await User.findByIdAndUpdate(user.id, {
-        $inc: { questions: 1 }
-    });
+    // Update Mongo user stats
+    await User.findByIdAndUpdate(
+        user.id,
+        {
+            $inc: {
+                questions: 1
+            }
+        }
+    );
 
-    await question.populate('authorId', 'username profilePicture');
-    await question.populate('communityId', 'name icon');
+    try {
+
+        // Save same question in PostgreSQL
+        await prisma.question.create({
+
+            data: {
+
+                title: question.title,
+                body: question.body,
+                image: question.image,
+
+                authorId: user.id,
+
+                communityId:
+                    body.communityId,
+
+                tags:
+                    question.tags || [],
+
+                upvotes:
+                    question.upvotes,
+
+                downvotes:
+                    question.downvotes,
+
+                answers:
+                    question.answers,
+
+                comments:
+                    question.comments
+            }
+
+        });
+
+    } catch(error){
+
+        console.log(
+            "Prisma question save failed:",
+            error.message
+        );
+    }
+
+    await question.populate(
+        'authorId',
+        'username profilePicture'
+    );
+
+    await question.populate(
+        'communityId',
+        'name icon'
+    );
 
     return question;
 };
@@ -131,3 +196,17 @@ exports.searchQuestions = async (keyword) => {
     .populate('authorId', 'username profilePicture')
     .populate('communityId', 'name icon');
 };
+
+try{
+    await prisma.question.create({
+        data:{
+            title: question.title,
+            body: question.body,
+            authorId: userId,
+            tags: question.tags || []
+        }
+    });
+}
+catch(error){
+    console.log("Postgres question sync failed:", error);
+}
