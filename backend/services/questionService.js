@@ -197,16 +197,3 @@ exports.searchQuestions = async (keyword) => {
     .populate('communityId', 'name icon');
 };
 
-try{
-    await prisma.question.create({
-        data:{
-            title: question.title,
-            body: question.body,
-            authorId: userId,
-            tags: question.tags || []
-        }
-    });
-}
-catch(error){
-    console.log("Postgres question sync failed:", error);
-}
