@@ -23,7 +23,7 @@ router.get("/google/callback",
         );
 
         // Redirect to frontend with token
-        res.redirect(`http://https://threadmydoubt.vercel.app///oauth-success?token=${token}`);
+        res.redirect(`https://threadmydoubt.vercel.app///oauth-success?token=${token}`);
     }
 );
 
