@@ -152,22 +152,48 @@ async(userId,updates)=>{
     return user;
 };
 
-try {
-    await prisma.user.upsert({
-        where: {
-            email: user.email
-        },
-        update: {},
-        create: {
-            username: user.username,
-            email: user.email,
-            password: user.password, // already hashed
-            role: user.role || "Community Member",
-            bio: user.bio || "",
-            profilePicture: user.profilePicture,
-            achievements: []
-        }
-    });
-} catch(error) {
-    console.log("Postgres sync failed:", error);
-}
+
+const User = require("../models/User");
+const prisma = require("../config/prisma");
+
+exports.register = async (req, res) => {
+    try {
+
+        const { username, email, password } = req.body;
+
+        // Mongo save (your existing code)
+        const user = await User.create({
+            username,
+            email,
+            password
+        });
+
+        // PostgreSQL mirror
+        await prisma.user.upsert({
+            where: {
+                email: user.email
+            },
+            update: {},
+            create: {
+                username: user.username,
+                email: user.email,
+                password: user.password,
+                achievements: []
+            }
+        });
+
+        res.status(201).json({
+            success: true,
+            user
+        });
+
+    } catch(error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Error"
+        });
+    }
+};
