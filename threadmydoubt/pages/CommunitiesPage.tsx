@@ -168,13 +168,13 @@ const CommunitiesPage: React.FC<CommunitiesPageProps> = ({ user, setNotification
                         />
                     </div>
                     <div>
-                        <div className="flex justify-between items-center mb-1">
+                        {/* <div className="flex justify-between items-center mb-1">
                             <label htmlFor="communityDescription" className="block text-sm font-medium text-[color:var(--text-muted)]">Description</label>
-                            <button type="button" onClick={handleGenerateDesc} disabled={isGeneratingDesc} className="text-xs font-semibold text-[color:var(--accent)] hover:underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1">
+                             <button type="button" onClick={handleGenerateDesc} disabled={isGeneratingDesc} className="text-xs font-semibold text-[color:var(--accent)] hover:underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1">
                                 {isGeneratingDesc ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-robot"></i>}
                                 {isGeneratingDesc ? 'Generating...' : 'Generate with AI'}
-                            </button>
-                        </div>
+                            </button> 
+                        </div> */}
                         <textarea
                             id="communityDescription"
                             rows={4}
