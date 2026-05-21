@@ -1,6 +1,5 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const prisma = require('../config/prisma');
 const bcrypt = require('bcryptjs');
 
 // Generate JWT
@@ -19,7 +18,7 @@ exports.registerUser = async ({
     password
 }) => {
 
-    // Check MongoDB first
+    // Check if user already exists
     const userExists = await User.findOne({
         $or: [{ email }, { username }]
     });
@@ -28,63 +27,54 @@ exports.registerUser = async ({
         throw new Error('User already exists');
     }
 
-    // Save in MongoDB
+    // Save user in MongoDB
     const user = await User.create({
         username,
         email,
         password
     });
 
-    // Mirror in PostgreSQL
-    try {
+    const token = generateToken(user._id);
 
-        await prisma.user.upsert({
-            where: {
-                email: user.email
-            },
+    return {
+        user,
+        token
+    };
+};
 
-            update: {},
 
-            create: {
-                id: user._id.toString(),
-                username: user.username,
-                email: user.email,
+// Login User
+exports.loginUser = async ({
+    email,
+    password
+}) => {
 
-                // Already hashed by your mongoose model
-                password: user.password,
-
-                role:
-                    user.role ||
-                    "Community Member",
-
-                bio:
-                    user.bio ||
-                    "",
-
-                reputation:
-                    user.reputation ||
-                    0,
-
-                profilePicture:
-                    user.profilePicture ||
-                    "https://ui-avatars.com/api/?name=User&background=random",
-
-                achievements: []
-            }
-        });
-
-        console.log(
-            "User saved to PostgreSQL:",
-            user.email
+    if (!email || !password) {
+        throw new Error(
+            'Please provide email and password'
         );
+    }
 
-    } catch(error){
+    // Find user and include password
+    const user = await User
+        .findOne({ email })
+        .select('+password');
 
-        console.log(
-            "Prisma save failed:"
+    if (!user) {
+        throw new Error(
+            'Invalid credentials'
         );
+    }
 
-        console.log(error);
+    const isMatch = await bcrypt.compare(
+        password,
+        user.password
+    );
+
+    if (!isMatch) {
+        throw new Error(
+            'Invalid credentials'
+        );
     }
 
     const token = generateToken(
@@ -98,74 +88,21 @@ exports.registerUser = async ({
 };
 
 
-// Login User
-
-exports.loginUser = async ({
-    email,
-    password
-}) => {
-
-    if (!email || !password) {
-        throw new Error(
-            'Please provide email and password'
-        );
-    }
-
-    // PostgreSQL lookup
-    const user = await prisma.user.findUnique({
-        where:{
-            email
-        }
-    });
-
-    if(!user){
-        throw new Error(
-            'Invalid credentials'
-        );
-    }
-
-    const isMatch =
-        await bcrypt.compare(
-            password,
-            user.password
-        );
-
-    if(!isMatch){
-        throw new Error(
-            'Invalid credentials'
-        );
-    }
-
-    const token =
-        generateToken(
-            user.id
-        );
-
-    return {
-        user,
-        token
-    };
-};
-
-
 // Get Current User
-exports.getCurrentUser =
-async (userId) => {
-
-    return await User.findById(
-        userId
-    );
+exports.getCurrentUser = async (userId) => {
+    return await User.findById(userId);
 };
 
 
 // Update User Profile
-exports.updateUserProfile =
-async (userId, updates) => {
+exports.updateUserProfile = async (
+    userId,
+    updates
+) => {
 
-    const user =
-        await User.findById(
-            userId
-        );
+    const user = await User.findById(
+        userId
+    );
 
     if (!user) {
         throw new Error(
@@ -184,8 +121,7 @@ async (userId, updates) => {
     if (
         updates.bio !== undefined
     ) {
-        user.bio =
-            updates.bio;
+        user.bio = updates.bio;
     }
 
     user.profilePicture =
