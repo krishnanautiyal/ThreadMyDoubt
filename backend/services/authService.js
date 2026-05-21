@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
+const bcrypt = require('bcryptjs');
 
 // Generate JWT
 const generateToken = (id) => {
@@ -98,6 +99,7 @@ exports.registerUser = async ({
 
 
 // Login User
+
 exports.loginUser = async ({
     email,
     password
@@ -109,23 +111,26 @@ exports.loginUser = async ({
         );
     }
 
-    const user =
-        await User.findOne({
+    // PostgreSQL lookup
+    const user = await prisma.user.findUnique({
+        where:{
             email
-        }).select('+password');
+        }
+    });
 
-    if (!user) {
+    if(!user){
         throw new Error(
             'Invalid credentials'
         );
     }
 
     const isMatch =
-        await user.matchPassword(
-            password
+        await bcrypt.compare(
+            password,
+            user.password
         );
 
-    if (!isMatch) {
+    if(!isMatch){
         throw new Error(
             'Invalid credentials'
         );
@@ -133,7 +138,7 @@ exports.loginUser = async ({
 
     const token =
         generateToken(
-            user._id
+            user.id
         );
 
     return {

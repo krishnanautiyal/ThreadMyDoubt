@@ -1,67 +1,19 @@
 generator client {
-  provider = "prisma-client-js"
+ provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-enum AuthProvider {
-  local
-  google
+ provider = "postgresql"
 }
 
 model User {
-  id String @id @db.Text
-
-  username String  @unique
-  email    String  @unique
-  password String?
-
-  role       String @default("Community Member")
-  bio        String @default("")
-  reputation Int    @default(0)
-
-  questionsCount Int @default(0)
-  answersCount   Int @default(0)
-
-  upvotes   Int @default(0)
-  downvotes Int @default(0)
-
-  profilePicture String @default("https://ui-avatars.com/api/?name=User&background=random")
-
-  achievements String[]
-
-  joinedAt DateTime @default(now())
-
-  googleId     String?      @unique
-  authProvider AuthProvider @default(local)
-
-  questions Question[]
-}
-
-model Question {
-  id String @id @db.Text
-
-  title String
-  body  String
-  image String?
-
-  authorId String @db.Text
-  author   User   @relation(fields: [authorId], references: [id])
-
-  communityId  String? @db.Text
-  bestAnswerId String? @db.Text
-
-  tags String[]
-
-  upvotes   Int @default(0)
-  downvotes Int @default(0)
-
-  answersCount  Int @default(0)
-  commentsCount Int @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+ id         String   @id
+ username   String
+ email      String   @unique
+ password   String
+ role       String?
+ bio        String?
+ reputation Int      @default(0)
+ profilePicture String?
+ createdAt  DateTime @default(now())
 }
