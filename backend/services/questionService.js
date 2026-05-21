@@ -79,7 +79,7 @@ exports.createQuestion = async ({ body, user }) => {
         await prisma.question.create({
 
             data: {
-
+                id: question._id.toString(),
                 title: question.title,
                 body: question.body,
                 image: question.image,
@@ -98,10 +98,10 @@ exports.createQuestion = async ({ body, user }) => {
                 downvotes:
                     question.downvotes,
 
-                answers:
+                answersCount:
                     question.answers,
 
-                comments:
+                commentsCount:
                     question.comments
             }
 

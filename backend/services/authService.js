@@ -45,6 +45,7 @@ exports.registerUser = async ({
             update: {},
 
             create: {
+                id: user._id.toString(),
                 username: user.username,
                 email: user.email,
 

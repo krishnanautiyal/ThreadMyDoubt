@@ -13,7 +13,7 @@ enum AuthProvider {
 }
 
 model User {
-  id String @id @default(uuid())
+  id String @id @db.Text
 
   username String  @unique
   email    String  @unique
@@ -42,17 +42,17 @@ model User {
 }
 
 model Question {
-  id String @id @default(uuid())
+  id String @id @db.Text
 
   title String
   body  String
   image String?
 
-  authorId String
+  authorId String @db.Text
   author   User   @relation(fields: [authorId], references: [id])
 
-  communityId  String?
-  bestAnswerId String?
+  communityId  String? @db.Text
+  bestAnswerId String? @db.Text
 
   tags String[]
 
