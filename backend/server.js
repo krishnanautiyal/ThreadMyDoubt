@@ -19,9 +19,10 @@ const app = express();
 
 // Allowed Origins for CORS
 const defaultOrigins = [
-    'https://threadmydoubt.vercel.app',
-    'http://localhost:5173',
-    'http://localhost:3000'
+    'https://threadmydoubt.vercel.app'
+    // ,
+    // 'http://localhost:5173',
+    // 'http://localhost:3000'
 ];
 
 const isOriginAllowed = (origin) => {
@@ -42,6 +43,13 @@ app.use(cors({
             callback(null, true); // Allow requests while supporting credentials
         }
     },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+app.options("*", cors({
+    origin: allowedOrigins,
     credentials: true
 }));
 
