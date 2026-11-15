@@ -14,7 +14,7 @@ const OAuthSuccess = ({ setUser }: { setUser: (user: User) => void }) => {
             localStorage.setItem("token", token);
 
             // OPTIONAL: fetch user from backend
-            fetch("https://threadmydoubt.onrender.com/api/auth/me", {
+            fetch("https://threadmydoubt-2.onrender.com/api/auth/me", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

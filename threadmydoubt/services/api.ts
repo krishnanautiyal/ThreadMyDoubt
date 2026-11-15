@@ -1,4 +1,4 @@
-const BASE = "https://threadmydoubt.onrender.com/api";
+const BASE = "https://threadmydoubt-2.onrender.com/api";
 
 const getHeaders = () => {
     const headers: HeadersInit = {
