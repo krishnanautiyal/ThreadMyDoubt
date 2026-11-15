@@ -1,3 +1,4 @@
+
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -17,77 +18,148 @@ const { protect } = require('./middleware/authMiddleware');
 
 const app = express();
 
-// Allowed Origins for CORS
-const defaultOrigins = [
+// ==========================================
+// CORS CONFIGURATION
+// ==========================================
+
+const allowedOrigins = [
     'https://threadmydoubt.vercel.app'
-    // ,
-    // 'http://localhost:5173',
-    // 'http://localhost:3000'
 ];
 
 const isOriginAllowed = (origin) => {
-    if (!origin) return true; // Mobile apps, curl, server-to-server
-    if (defaultOrigins.includes(origin)) return true;
-    if (origin.endsWith('.vercel.app')) return true;
-    if (process.env.CLIENT_URL && origin === process.env.CLIENT_URL) return true;
-    if (process.env.NODE_ENV !== 'production' && origin.startsWith('http://localhost:')) return true;
+    // Allow requests without an origin (curl, server-to-server)
+    if (!origin) return true;
+
+    // Allow explicitly configured frontend origins
+    if (allowedOrigins.includes(origin)) return true;
+
+    // Allow CLIENT_URL from Render environment variables
+    if (
+        process.env.CLIENT_URL &&
+        origin === process.env.CLIENT_URL.replace(/\/$/, '')
+    ) {
+        return true;
+    }
+
+    // Allow localhost only during development
+    if (
+        process.env.NODE_ENV !== 'production' &&
+        origin.startsWith('http://localhost:')
+    ) {
+        return true;
+    }
+
     return false;
 };
 
-// Middleware
-app.use(cors({
+const corsOptions = {
     origin: (origin, callback) => {
         if (isOriginAllowed(origin)) {
             callback(null, true);
         } else {
-            callback(null, true); // Allow requests while supporting credentials
+            console.warn('Blocked CORS origin:', origin);
+            callback(new Error('Not allowed by CORS'));
         }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-}));
+    methods: [
+        'GET',
+        'POST',
+        'PUT',
+        'PATCH',
+        'DELETE',
+        'OPTIONS'
+    ],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization'
+    ]
+};
 
-app.options("*", cors({
-    origin: allowedOrigins,
-    credentials: true
-}));
+// ==========================================
+// MIDDLEWARE
+// ==========================================
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
+
 app.use(passport.initialize());
 
-// Serving Static Files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serving static files
+app.use(
+    '/uploads',
+    express.static(path.join(__dirname, 'uploads'))
+);
 
-// Routes
+// ==========================================
+// API ROUTES
+// ==========================================
+
 app.use('/api/test', testRoutes);
+
 app.use('/auth', require('./routes/googleAuthRoutes'));
+
 app.use('/api/auth', require('./routes/authRoutes'));
+
 app.use('/api/questions', require('./routes/questionRoutes'));
+
 app.use('/api/answers', require('./routes/answerRoutes'));
+
 app.use('/api/communities', require('./routes/communityRoutes'));
+
 app.use('/api/votes', require('./routes/voteRoutes'));
+
 app.use('/api/logs', require('./routes/logRoutes'));
+
 app.use('/api/users', require('./routes/userRoutes'));
 
 // Dashboard route
 app.get('/api/dashboard', protect, getDashboard);
 
-// Basic health route
+// ==========================================
+// HEALTH CHECK
+// ==========================================
+
 app.get('/', (req, res) => {
-    res.send('API is running...');
+    res.status(200).json({
+        success: true,
+        message: 'ThreadMyDoubt API is running',
+        environment: process.env.NODE_ENV
+    });
 });
 
-// JSON Error Handler
+// ==========================================
+// ERROR HANDLING
+// ==========================================
+
+// JSON parsing and other application errors
 app.use((err, req, res, next) => {
-    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    if (
+        err instanceof SyntaxError &&
+        err.status === 400 &&
+        'body' in err
+    ) {
         console.error('JSON Parsing Error:', err.message);
-        return res.status(400).json({ success: false, error: 'Invalid JSON format' });
+
+        return res.status(400).json({
+            success: false,
+            error: 'Invalid JSON format'
+        });
     }
-    next();
+
+    console.error('Application Error:', err.message);
+
+    res.status(err.status || 500).json({
+        success: false,
+        error: err.message || 'Internal Server Error'
+    });
 });
 
-// Create HTTP Server & Socket.io
+// ==========================================
+// HTTP SERVER & SOCKET.IO
+// ==========================================
+
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -96,7 +168,7 @@ const io = new Server(server, {
             if (isOriginAllowed(origin)) {
                 callback(null, true);
             } else {
-                callback(null, true);
+                callback(new Error('Not allowed by Socket.IO CORS'));
             }
         },
         methods: ['GET', 'POST'],
@@ -104,15 +176,16 @@ const io = new Server(server, {
     }
 });
 
-// Store io instance globally on app
+// Store Socket.IO instance globally on app
 app.set('io', io);
 
-// Socket.io Connection Handler
+// Socket.IO connection handler
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
     socket.on('joinQuestion', (questionId) => {
         socket.join(questionId);
+
         console.log(`User joined room: ${questionId}`);
     });
 
@@ -121,35 +194,61 @@ io.on('connection', (socket) => {
     });
 });
 
+// ==========================================
+// SERVER CONFIGURATION
+// ==========================================
+
 const PORT = process.env.PORT || 5000;
 
-// Start Server after database connection
+// ==========================================
+// START SERVER AFTER DATABASE CONNECTION
+// ==========================================
+
 const startServer = async () => {
     try {
+        // Connect to MongoDB
         await connectDB();
+
+        console.log('MongoDB connected successfully');
 
         // Safe community slug backfill
         try {
             const communities = await Community.find();
-            for (let c of communities) {
-                if (!c.slug) {
-                    c.slug = c.name
+
+            for (const community of communities) {
+                if (!community.slug) {
+                    community.slug = community.name
                         .toLowerCase()
                         .replace(/[^a-z0-9]+/g, '-')
                         .replace(/(^-|-$)/g, '');
-                    await c.save();
-                    console.log('Updated community slug:', c.slug);
+
+                    await community.save();
+
+                    console.log(
+                        'Updated community slug:',
+                        community.slug
+                    );
                 }
             }
         } catch (slugError) {
-            console.error('Community slug initialization warning:', slugError.message);
+            console.error(
+                'Community slug initialization warning:',
+                slugError.message
+            );
         }
 
+        // Start HTTP server
         server.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
+            console.log('Socket.IO server initialized');
         });
+
     } catch (err) {
-        console.error('Server startup failed:', err.message);
+        console.error(
+            'Server startup failed:',
+            err.message
+        );
+
         process.exit(1);
     }
 };
