@@ -4,7 +4,6 @@ const Question = require('../models/Question');
 const Community = require('../models/Community');
 const Answer = require('../models/Answer');
 const User = require('../models/User');
-const prisma = require('../config/prisma');
 
 // 🔹 Get all questions
 exports.getQuestions = async (queryParams) => {
@@ -73,48 +72,6 @@ exports.createQuestion = async ({ body, user }) => {
         }
     );
 
-    try {
-
-        // Save same question in PostgreSQL
-        await prisma.question.create({
-
-            data: {
-                id: question._id.toString(),
-                title: question.title,
-                body: question.body,
-                image: question.image,
-
-                authorId: user.id,
-
-                communityId:
-                    body.communityId,
-
-                tags:
-                    question.tags || [],
-
-                upvotes:
-                    question.upvotes,
-
-                downvotes:
-                    question.downvotes,
-
-                answersCount:
-                    question.answers,
-
-                commentsCount:
-                    question.comments
-            }
-
-        });
-
-    } catch(error){
-
-        console.log(
-            "Prisma question save failed:",
-            error.message
-        );
-    }
-
     await question.populate(
         'authorId',
         'username profilePicture'
@@ -168,12 +125,6 @@ exports.deleteQuestion = async ({ questionId, userId }) => {
 
     // delete question
     await question.deleteOne();
-
-    const io = req.app.get("io");
-
-io.emit("questionDeleted", {
-    questionId: question._id
-});
 
     return question;
 };

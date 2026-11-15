@@ -2,62 +2,63 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/User");
 
-passport.use(new GoogleStrategy(
-{
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL
-},
-async (accessToken, refreshToken, profile, done) => {
-    try {
-        // 1. Extract email safely
-        const email = profile.emails?.[0]?.value;
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(new GoogleStrategy(
+        {
+            clientID: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            callbackURL: process.env.GOOGLE_CALLBACK_URL || "https://threadmydoubt.onrender.com/auth/google/callback"
+        },
+        async (accessToken, refreshToken, profile, done) => {
+            try {
+                // 1. Extract email safely
+                const email = profile.emails?.[0]?.value;
 
-        if (!email) {
-            return done(null, false);
-        }
+                if (!email) {
+                    return done(null, false);
+                }
 
-        // 2. Check if user exists with googleId
-        let user = await User.findOne({ googleId: profile.id });
+                // 2. Check if user exists with googleId
+                let user = await User.findOne({ googleId: profile.id });
 
-        if (user) {
-            return done(null, user);
-        }
+                if (user) {
+                    return done(null, user);
+                }
 
-        // 3. Check if user exists with same email (IMPORTANT)
-        user = await User.findOne({ email });
+                // 3. Check if user exists with same email (IMPORTANT)
+                user = await User.findOne({ email });
 
-        if (user) {
-            // Link Google account
-            user.googleId = profile.id;
-            user.authProvider = "google";
+                if (user) {
+                    // Link Google account
+                    user.googleId = profile.id;
+                    user.authProvider = "google";
 
-            // Optional: update profile pic
-            if (profile.photos?.[0]?.value) {
-                user.profilePicture = profile.photos[0].value;
+                    // Optional: update profile pic
+                    if (profile.photos?.[0]?.value) {
+                        user.profilePicture = profile.photos[0].value;
+                    }
+
+                    await user.save();
+                    return done(null, user);
+                }
+
+                // 4. Create new user
+                user = await User.create({
+                    username: profile.displayName || email.split('@')[0],
+                    email: email,
+                    googleId: profile.id,
+                    authProvider: "google",
+                    profilePicture: profile.photos?.[0]?.value
+                });
+
+                return done(null, user);
+            } catch (err) {
+                return done(err, null);
             }
-
-            await user.save();
-            return done(null, user);
         }
-
-        // 4. Create new user
-        user = await User.create({
-            username: profile.displayName,
-            email: email,
-            googleId: profile.id,
-            authProvider: "google",
-            profilePicture: profile.photos?.[0]?.value
-        });
-
-        return done(null, user);
-
-
-        console.log("CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
-
-    } catch (err) {
-        return done(err, null);
-    }
-}));
+    ));
+} else {
+    console.warn("⚠️ Google OAuth credentials missing (GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET). Google login strategy disabled.");
+}
 
 module.exports = passport;

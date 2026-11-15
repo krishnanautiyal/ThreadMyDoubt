@@ -3,6 +3,16 @@ const path = require('path');
 
 const logFilePath = path.join(__dirname, '../logs/activity.log');
 
+// Ensure log directory exists
+const logDir = path.dirname(logFilePath);
+if (!fs.existsSync(logDir)) {
+    try {
+        fs.mkdirSync(logDir, { recursive: true });
+    } catch (e) {
+        console.error("Failed to create logs directory:", e.message);
+    }
+}
+
 /**
  * Log an event to activity.log in a structured format
  * @param {Object} logData - The data to log
