@@ -57,7 +57,8 @@ const LogsPanel: React.FC = () => {
             try {
                 const user = JSON.parse(storedUser);
                 if (user.token) {
-                    fetch('https://threadmydoubt-2.onrender.com/api/logs/download', {
+                    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://threadmydoubt-2.onrender.com';
+                    fetch(`${backendUrl}/api/logs/download`, {
                         headers: {
                             'Authorization': `Bearer ${user.token}`
                         }

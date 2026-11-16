@@ -1,4 +1,4 @@
-const BASE = "https://threadmydoubt-2.onrender.com/api";
+const BASE = import.meta.env.VITE_API_URL || "https://threadmydoubt-2.onrender.com/api";
 
 const getHeaders = () => {
     const headers: HeadersInit = {

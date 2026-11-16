@@ -37,7 +37,7 @@ router.get("/google/callback",
         );
 
         // Redirect to frontend with token
-        const frontendUrl = process.env.CLIENT_URL || "https://threadmydoubt.vercel.app";
+        const frontendUrl = process.env.CLIENT_URL || "https://thread-my-doubt.vercel.app";
         res.redirect(`${frontendUrl}/oauth-success?token=${token}`);
     }
 );

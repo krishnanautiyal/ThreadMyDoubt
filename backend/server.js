@@ -23,28 +23,42 @@ const app = express();
 // ==========================================
 
 const allowedOrigins = [
-    'https://threadmydoubt.vercel.app'
+    'https://thread-my-doubt.vercel.app',
+    'https://threadmydoubt.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:5174',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:3000'
 ];
 
 const isOriginAllowed = (origin) => {
-    // Allow requests without an origin (curl, server-to-server)
+    // Allow requests without an origin (curl, mobile apps, server-to-server)
     if (!origin) return true;
 
-    // Allow explicitly configured frontend origins
-    if (allowedOrigins.includes(origin)) return true;
+    const normalizedOrigin = origin.trim().replace(/\/$/, '');
 
-    // Allow CLIENT_URL from Render environment variables
+    // Allow explicitly configured frontend origins
+    if (allowedOrigins.includes(normalizedOrigin)) return true;
+
+    // Allow CLIENT_URL from Render environment variables (supports comma-separated URLs)
+    if (process.env.CLIENT_URL) {
+        const clientUrls = process.env.CLIENT_URL.split(',').map(url => url.trim().replace(/\/$/, ''));
+        if (clientUrls.includes(normalizedOrigin)) return true;
+    }
+
+    // Allow any Vercel preview or production deployment domain
     if (
-        process.env.CLIENT_URL &&
-        origin === process.env.CLIENT_URL.replace(/\/$/, '')
+        /^https:\/\/(thread-my-doubt|threadmydoubt)[a-z0-9-]*\.vercel\.app$/.test(normalizedOrigin) ||
+        normalizedOrigin.endsWith('.vercel.app')
     ) {
         return true;
     }
 
-    // Allow localhost only during development
+    // Allow localhost during development
     if (
         process.env.NODE_ENV !== 'production' &&
-        origin.startsWith('http://localhost:')
+        (normalizedOrigin.startsWith('http://localhost:') || normalizedOrigin.startsWith('http://127.0.0.1:'))
     ) {
         return true;
     }
@@ -57,7 +71,7 @@ const corsOptions = {
         if (isOriginAllowed(origin)) {
             callback(null, true);
         } else {
-            console.warn('Blocked CORS origin:', origin);
+            console.warn('Blocked Express CORS origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -168,7 +182,8 @@ const io = new Server(server, {
             if (isOriginAllowed(origin)) {
                 callback(null, true);
             } else {
-                callback(new Error('Not allowed by Socket.IO CORS'));
+                console.warn('Blocked Socket.IO CORS origin:', origin);
+                callback(null, false);
             }
         },
         methods: ['GET', 'POST'],
@@ -193,7 +208,21 @@ io.on('connection', (socket) => {
         console.log('User disconnected:', socket.id);
     });
 });
+io.engine.on("connection_error", (err) => {
+    console.log("SOCKET CONNECTION ERROR");
 
+    console.log("Code:", err.code);
+    console.log("Message:", err.message);
+    console.log("Context:", err.context);
+});
+
+io.on("connection", (socket) => {
+    console.log("Socket connected:", socket.id);
+
+    socket.on("disconnect", (reason) => {
+        console.log("Socket disconnected:", reason);
+    });
+});
 // ==========================================
 // SERVER CONFIGURATION
 // ==========================================
